@@ -6,14 +6,9 @@ on:
   push:
     branches:
       - main
-    paths:
-      - '**.kt'
-      - '**.java'
-      - '**.xml'
-      - '**.gradle'
-      - '**.gradle.kts'
-      - 'gradle.properties'
-      - '.github/workflows/android.yaml'
+
+permissions:
+  contents: read
 
 jobs:
   build:
@@ -32,17 +27,22 @@ jobs:
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
 
-      - name: Grant execute permission
-        run: chmod +x gradlew
+      - name: Check project files
+        run: |
+          ls -la
+          test -f settings.gradle.kts
+          test -f app/build.gradle.kts
 
       - name: Build Debug APK
-        run: ./gradlew assembleDebug --stacktrace
+        run: gradle assembleDebug --stacktrace
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: TELE-NEW-APP-APK
-          path: '**/build/outputs/apk/debug/*.apk'
+          path: app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
           retention-days: 7
